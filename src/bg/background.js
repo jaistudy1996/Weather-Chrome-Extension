@@ -7,7 +7,6 @@
 //TODO: add location refresh in settings.
 
 
-console.log('hello');
 //example of using a message handler from the inject scripts
 chrome.extension.onMessage.addListener(
   function(request, sender, sendResponse) {
@@ -19,6 +18,7 @@ chrome.extension.onMessage.addListener(
 var ERROR = "error";
 var locationCords = {};
 var openWeatherMapKey = 'bad43f7b54535ae3baeb52cbe1beff28';
+var googleMapsApiKey = "AIzaSyDizy6zNKrzN5nSZF7uoDmV_UQZM4aEfUI";
 var weatherUnits = "Metric";  //Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
 // Get user's current location
 function getLocation(){
@@ -93,6 +93,30 @@ function loadScript(){
 
 loadScript();
 
+
+var omniboxSuggestionArray;
+/**
+ * [inputChanged description]
+ * @param {string} user_input The string input by the user
+ */
+function omniboxSuggestions(user_input, suggest){
+    let xhr = new XMLHttpRequest();
+    xhr.responseType = 'json';
+    let url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${user_input}&key=${googleMapsApiKey}`;
+    xhr.onreadystatechange = function(){
+      if(this.readyState == 4 && this.status == 200){
+        console.log(xhr.response);
+        let suggestions = [];
+        for(let i=0; i<xhr.response.predictions.length; i++){
+          suggestions.push({content: xhr.response.predictions[i].description, description: xhr.response.predictions[i].description});
+        }
+        suggest(suggestions);
+      }
+    }
+    xhr.open("GET", url, true);
+    xhr.send();
+}
+
 /**
  * Add click listener to icon which will trigger getLocation to get new weather and new location.
  */
@@ -102,11 +126,9 @@ chrome.browserAction.onClicked.addListener(function(){
 
 chrome.omnibox.onInputChanged.addListener(
   function(text, suggest) {
+    // suggest is a function that takes an array of objects containing content and description
+    omniboxSuggestions(text, suggest);
     console.log('inputChanged: ' + text);
-    suggest([
-      {content: text + " one", description: "the first one"},
-      {content: text + " number two", description: "the second entry"}
-    ]);
   });
 
 // This event is fired with the user accepts the input in the omnibox.

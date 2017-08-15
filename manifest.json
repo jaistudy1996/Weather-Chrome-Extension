@@ -1,6 +1,6 @@
 {
   "name": "Weather Application",
-  "version": "0.0.9",
+  "version": "0.0.11",
   "manifest_version": 2,
   "description": "Latest Weather Updates",
   "homepage_url": "http://www.jayantarora.com",
@@ -30,5 +30,5 @@
   "omnibox": {
     "keyword": "weather"
   },
-  "content_security_policy": "script-src 'self' https://maps.googleapis.com/maps/api/js; object-src 'self'"
+  "content_security_policy": "script-src 'self' https://maps.googleapis.com/maps/api/js https://maps.googleapis.com/maps-api-v3/api/js/30/1/common.js https://maps.googleapis.com/maps-api-v3/api/js/30/1/util.js https://maps.googleapis.com/maps-api-v3/api/js/30/1/stats.js; object-src 'self'"
 }
