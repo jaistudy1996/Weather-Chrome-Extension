@@ -68,7 +68,9 @@ function getWeather(){
     if(this.readyState == 4 && this.status == 200){
       console.log(xhr.response);
       chrome.browserAction.setBadgeText({text: `${xhr.response.main.temp}${weatherUnits == "Metric" ? "C" : "F"}`});
-      chrome.browserAction.setTitle({title: `${xhr.response.name}: ${xhr.response.main.temp_min}° - ${xhr.response.main.temp_max}°`});
+      chrome.browserAction.setTitle({title: `${xhr.response.name}: ${xhr.response.main.temp_min}° - ${xhr.response.main.temp_max}°:  ${xhr.response.weather[0].description}`});
+      chrome.browserAction.setIcon({path: `http://openweathermap.org/img/w/${xhr.response.weather[0].icon}.png`});
+      chrome.browserAction.setBadgeBackgroundColor({color: [0,0,0,1]})
     }
   }
   xhr.open("GET", url, true);
@@ -76,8 +78,40 @@ function getWeather(){
 }
 
 /**
+ * @function loadScript
+ * Load Google maps api script.
+ */
+function loadScript(){
+  let script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.async = true;
+  script.defer = true;
+  script.src = "https://maps.googleapis.com/maps/api/js";
+  let head = document.getElementsByTagName("head")[0];
+  head.appendChild(script);
+}
+
+loadScript();
+
+/**
  * Add click listener to icon which will trigger getLocation to get new weather and new location.
  */
 chrome.browserAction.onClicked.addListener(function(){
   getLocation();
 });
+
+chrome.omnibox.onInputChanged.addListener(
+  function(text, suggest) {
+    console.log('inputChanged: ' + text);
+    suggest([
+      {content: text + " one", description: "the first one"},
+      {content: text + " number two", description: "the second entry"}
+    ]);
+  });
+
+// This event is fired with the user accepts the input in the omnibox.
+chrome.omnibox.onInputEntered.addListener(
+  function(text) {
+    console.log('inputEntered: ' + text);
+    alert('You just typed "' + text + '"');
+  });
