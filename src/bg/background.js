@@ -41,8 +41,7 @@ function loc_success(position) {
 	locationCords.lat = lat;
 	locationCords.lng = lng;
 
-  console.log(locationCords);
-  getWeather();
+  getWeather(); // call this funtion everytime we have new location cordinats.
 }
 
 /**
@@ -66,11 +65,15 @@ function getWeather(){
   xhr.responseType = 'json';
   let url = `http://api.openweathermap.org/data/2.5/weather?lat=${locationCords.lat}&lon=${locationCords.lng}&units=${weatherUnits}&APPID=${openWeatherMapKey}`;
   xhr.onreadystatechange = function(){
-    console.log(url);
     if(this.readyState == 4 && this.status == 200){
       console.log(xhr.response);
+      chrome.browserAction.setBadgeText({text: `${xhr.response.main.temp}`});
     }
   }
   xhr.open("GET", url, true);
   xhr.send();
 }
+
+chrome.browserAction.onClicked.addListener(function(){
+  getLocation();
+});
