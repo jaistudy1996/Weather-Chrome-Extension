@@ -19,10 +19,11 @@ var ERROR = "error";
 var locationCords = {};
 var openWeatherMapKey = 'bad43f7b54535ae3baeb52cbe1beff28';
 var googleMapsApiKey = "AIzaSyDizy6zNKrzN5nSZF7uoDmV_UQZM4aEfUI";
+var googelMapsLatLngKey = "AIzaSyD2gNxs_Kcp_QMcoEfndYw0L4ykMG3P-24";
 var weatherUnits = "Metric";  //Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
 // Get user's current location
 function getLocation(){
-	if("geolocation" in navigator){
+	if("geolocation" in navigator && locationCords.lat == undefined && locationCords.lng == undefined){
 		locationCords.status = "available";
 		navigator.geolocation.getCurrentPosition(loc_success, loc_error);
 	}
@@ -118,10 +119,31 @@ function omniboxSuggestions(user_input, suggest){
 }
 
 /**
+ * @function getLatLngForSelectedSuggestion this function will get lat and lng for suggestion
+ * @param {string} address
+ */
+function getLatLngForSelectedSuggestion(address){
+  let xhr = new XMLHttpRequest();
+  xhr.responseType = 'json';
+  let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${googelMapsLatLngKey}`;
+  xhr.onreadystatechange = function(){
+    if(this.readyState == 4 && this.status == 200){
+      console.log(xhr.response);
+      locationCords.lat = xhr.response.results[0].geometry.location.lat;
+      locationCords.lng = xhr.response.results[0].geometry.location.lng;
+      getWeather();
+    }
+  }
+  xhr.open("GET", url, true);
+  xhr.send();
+}
+
+/**
  * Add click listener to icon which will trigger getLocation to get new weather and new location.
  */
 chrome.browserAction.onClicked.addListener(function(){
-  getLocation();
+  // locationCords = {};
+  getWeather();
 });
 
 chrome.omnibox.onInputChanged.addListener(
@@ -135,5 +157,5 @@ chrome.omnibox.onInputChanged.addListener(
 chrome.omnibox.onInputEntered.addListener(
   function(text) {
     console.log('inputEntered: ' + text);
-    alert('You just typed "' + text + '"');
+    getLatLngForSelectedSuggestion(text);
   });
