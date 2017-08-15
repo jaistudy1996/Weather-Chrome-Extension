@@ -67,13 +67,17 @@ function getWeather(){
   xhr.onreadystatechange = function(){
     if(this.readyState == 4 && this.status == 200){
       console.log(xhr.response);
-      chrome.browserAction.setBadgeText({text: `${xhr.response.main.temp}`});
+      chrome.browserAction.setBadgeText({text: `${xhr.response.main.temp}${weatherUnits == "Metric" ? "C" : "F"}`});
+      chrome.browserAction.setTitle({title: `${xhr.response.name}: ${xhr.response.main.temp_min}° - ${xhr.response.main.temp_max}°`});
     }
   }
   xhr.open("GET", url, true);
   xhr.send();
 }
 
+/**
+ * Add click listener to icon which will trigger getLocation to get new weather and new location.
+ */
 chrome.browserAction.onClicked.addListener(function(){
   getLocation();
 });
