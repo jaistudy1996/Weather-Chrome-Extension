@@ -4,6 +4,9 @@
 //     "sample_setting": "This is how you use Store.js to remember values"
 // });
 
+//TODO: add location refresh in settings.
+
+
 console.log('hello');
 //example of using a message handler from the inject scripts
 chrome.extension.onMessage.addListener(
@@ -15,6 +18,8 @@ chrome.extension.onMessage.addListener(
 
 var ERROR = "error";
 var locationCords = {};
+var openWeatherMapKey = 'bad43f7b54535ae3baeb52cbe1beff28';
+var weatherUnits = "Metric";  //Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
 // Get user's current location
 function getLocation(){
 	if("geolocation" in navigator){
@@ -37,6 +42,7 @@ function loc_success(position) {
 	locationCords.lng = lng;
 
   console.log(locationCords);
+  getWeather();
 }
 
 /**
@@ -46,4 +52,25 @@ function loc_error() {
 	locationCords.status = ERROR;
 }
 
+// run for the first time.
 getLocation();
+
+// set interval to check for location every 15 minutes.
+var intvlGetLoc = setInterval(getLocation, 600000);
+
+/**
+ * This function will get latest weather update
+ */
+function getWeather(){
+  let xhr = new XMLHttpRequest();
+  xhr.responseType = 'json';
+  let url = `http://api.openweathermap.org/data/2.5/weather?lat=${locationCords.lat}&lon=${locationCords.lng}&units=${weatherUnits}&APPID=${openWeatherMapKey}`;
+  xhr.onreadystatechange = function(){
+    console.log(url);
+    if(this.readyState == 4 && this.status == 200){
+      console.log(xhr.response);
+    }
+  }
+  xhr.open("GET", url, true);
+  xhr.send();
+}

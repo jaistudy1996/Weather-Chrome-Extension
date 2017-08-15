@@ -1,6 +1,6 @@
 {
   "name": "Weather Application",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "manifest_version": 2,
   "description": "Latest Weather Updates",
   "homepage_url": "http://extensionizr.com",
@@ -25,7 +25,8 @@
   "permissions": [
     "notifications",
     "tabs",
-    "geolocation"
+    "geolocation",
+    "<all_urls>"
   ],
   "omnibox": {
     "keyword": "weather"
