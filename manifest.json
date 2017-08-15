@@ -1,13 +1,17 @@
 {
   "name": "Weather Application",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "manifest_version": 2,
   "description": "Latest Weather Updates",
   "homepage_url": "http://www.jayantarora.com",
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icons/sun16.png",
+    "24": "icons/sun24.png",
+    "32": "icons/sun32.png",
+    "64": "icons/sun64.png",
+    "128": "icons/sun128.png",
+    "256": "icons/sun256.png",
+    "512": "icons/sun512.png"
   },
   "default_locale": "en",
   "background": {
@@ -18,7 +22,7 @@
   },
   "options_page": "src/options_custom/index.html",
   "browser_action": {
-    "default_icon": "icons/icon19.png",
+    "default_icon": "icons/sun16.png",
     "default_title": "Weather Information"
   },
   "permissions": [
