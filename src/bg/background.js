@@ -42,7 +42,7 @@ function loc_success(position) {
 	locationCords.lat = lat;
 	locationCords.lng = lng;
 
-  getWeather(); // call this funtion everytime we have new location cordinats.
+  getWeather(locationCords); // call this funtion everytime we have new location cordinats.
 }
 
 /**
@@ -60,11 +60,13 @@ var intvlGetLoc = setInterval(getLocation, 600000);
 
 /**
  * This function will get latest weather update
+ * @function getWeather
+ * @param {object} _locationCords containing lat and lng properties respectively
  */
-function getWeather(){
+function getWeather(_locationCords){
   let xhr = new XMLHttpRequest();
   xhr.responseType = 'json';
-  let url = `http://api.openweathermap.org/data/2.5/weather?lat=${locationCords.lat}&lon=${locationCords.lng}&units=${weatherUnits}&APPID=${openWeatherMapKey}`;
+  let url = `http://api.openweathermap.org/data/2.5/weather?lat=${_locationCords.lat}&lon=${_locationCords.lng}&units=${weatherUnits}&APPID=${openWeatherMapKey}`;
   xhr.onreadystatechange = function(){
     if(this.readyState == 4 && this.status == 200){
       console.log(xhr.response);
@@ -97,8 +99,9 @@ loadScript();
 
 var omniboxSuggestionArray;
 /**
- * [inputChanged description]
+ * @function omniboxSuggestions this funtion shows relevant suggestions in the chrome for locations
  * @param {string} user_input The string input by the user
+ * @param {function} suggest this is the internal chrome funtion that shows suggestions in address bar
  */
 function omniboxSuggestions(user_input, suggest){
     let xhr = new XMLHttpRequest();
@@ -120,18 +123,23 @@ function omniboxSuggestions(user_input, suggest){
 
 /**
  * @function getLatLngForSelectedSuggestion this function will get lat and lng for suggestion
- * @param {string} address
+ * @param {string} address string text
+ * @param {string} action "change loc": change default location
  */
-function getLatLngForSelectedSuggestion(address){
+function getLatLngForSelectedSuggestion(address, action){
   let xhr = new XMLHttpRequest();
   xhr.responseType = 'json';
   let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${googelMapsLatLngKey}`;
   xhr.onreadystatechange = function(){
     if(this.readyState == 4 && this.status == 200){
       console.log(xhr.response);
-      locationCords.lat = xhr.response.results[0].geometry.location.lat;
-      locationCords.lng = xhr.response.results[0].geometry.location.lng;
-      getWeather();
+      let _locationCords = {};
+      _locationCords.lat = xhr.response.results[0].geometry.location.lat;
+      _locationCords.lng = xhr.response.results[0].geometry.location.lng;
+      if(action === "change loc"){
+        locationCords = _locationCords;
+      }
+      getWeather(_locationCords);
     }
   }
   xhr.open("GET", url, true);
@@ -142,14 +150,20 @@ function getLatLngForSelectedSuggestion(address){
  * Add click listener to icon which will trigger getLocation to get new weather and new location.
  */
 chrome.browserAction.onClicked.addListener(function(){
-  // locationCords = {};
-  getWeather();
+  getWeather(locationCords);
 });
 
 chrome.omnibox.onInputChanged.addListener(
   function(text, suggest) {
     // suggest is a function that takes an array of objects containing content and description
-    omniboxSuggestions(text, suggest);
+    if(text.includes("change location ")){
+        console.log(text.replace("change location ", ""));
+        omniboxSuggestions(text.replace("change location ", ""), suggest, "change loc");
+    }
+    else{
+      omniboxSuggestions(text, suggest);
+    }
+
     console.log('inputChanged: ' + text);
   });
 
