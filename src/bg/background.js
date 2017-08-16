@@ -49,20 +49,39 @@ var intvlGetLoc = setInterval(getLocation, 600000);
  * @param {object} _locationCords containing lat and lng properties respectively
  */
 function getWeather(_locationCords){
-  let xhr = new XMLHttpRequest();
-  xhr.responseType = 'json';
-  let url = `http://api.openweathermap.org/data/2.5/weather?lat=${_locationCords.lat}&lon=${_locationCords.lng}&units=${weatherUnits}&APPID=${openWeatherMapKey}`;
-  xhr.onreadystatechange = function(){
-    if(this.readyState == 4 && this.status == 200){
-      console.log(xhr.response);
-      chrome.browserAction.setBadgeText({text: `${xhr.response.main.temp}${weatherUnits == "Metric" ? "C" : "F"}`});
-      chrome.browserAction.setTitle({title: `${xhr.response.name}: ${xhr.response.main.temp_min}° - ${xhr.response.main.temp_max}°:  ${xhr.response.weather[0].description}`});
-      chrome.browserAction.setIcon({path: `http://openweathermap.org/img/w/${xhr.response.weather[0].icon}.png`});
-      chrome.browserAction.setBadgeBackgroundColor({color: [0,0,0,1]})
+  if( _locationCords.lat != undefined && _locationCords.lng != undefined ){
+    let xhr = new XMLHttpRequest();
+    xhr.responseType = 'json';
+    let url = `http://api.openweathermap.org/data/2.5/weather?lat=${_locationCords.lat}&lon=${_locationCords.lng}&units=${weatherUnits}&APPID=${openWeatherMapKey}`;
+    xhr.onreadystatechange = function(){
+      if(this.readyState == 4 && this.status == 200){
+        console.log(xhr.response);
+        chrome.browserAction.setBadgeText({text: `${xhr.response.main.temp}${weatherUnits == "Metric" ? "C" : "F"}`});
+        chrome.browserAction.setTitle({title: `${xhr.response.name}: ${xhr.response.main.temp_min}° - ${xhr.response.main.temp_max}°:  ${xhr.response.weather[0].description}`});
+        chrome.browserAction.setIcon({path: `http://openweathermap.org/img/w/${xhr.response.weather[0].icon}.png`});
+        chrome.browserAction.setBadgeBackgroundColor({color: [0,0,0,1]})
+      }
     }
+    xhr.open("GET", url, true);
+    xhr.send();
   }
-  xhr.open("GET", url, true);
-  xhr.send();
+  else{
+    // get location based on IP is navigator is not available
+    let xhr = new XMLHttpRequest();
+    xhr.responseType = 'json';
+    let url = 'http://freegeoip.net/json/';
+    xhr.onreadystatechange = function(){
+      if(this.readyState == 4 && this.status == 200){
+        ACTION = "change loc";
+        getLatLngForSelectedSuggestion(`${xhr.response.city}, ${xhr.response.region_code}, ${xhr.response.country_name}`);
+      }
+      else if(this.status == 403){
+        getWeather(_locationCords={lat: undefined, lng: undefined});
+      }
+    }
+    xhr.open("GET", url, true);
+    xhr.send();
+  }
 }
 
 /**
