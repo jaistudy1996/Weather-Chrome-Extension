@@ -5,6 +5,7 @@ var openWeatherMapKey = 'bad43f7b54535ae3baeb52cbe1beff28';
 var googleMapsApiKey = "AIzaSyDizy6zNKrzN5nSZF7uoDmV_UQZM4aEfUI";
 var googelMapsLatLngKey = "AIzaSyD2gNxs_Kcp_QMcoEfndYw0L4ykMG3P-24";
 var weatherUnits = "Metric";  //Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
+var ACTION = ""; //action string "change loc"
 // Get user's current location
 function getLocation(){
 	if("geolocation" in navigator && locationCords.lat == undefined && locationCords.lng == undefined){
@@ -108,9 +109,8 @@ function omniboxSuggestions(user_input, suggest){
 /**
  * @function getLatLngForSelectedSuggestion this function will get lat and lng for suggestion
  * @param {string} address string text
- * @param {string} action "change loc": change default location
  */
-function getLatLngForSelectedSuggestion(address, action){
+function getLatLngForSelectedSuggestion(address){
   let xhr = new XMLHttpRequest();
   xhr.responseType = 'json';
   let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${googelMapsLatLngKey}`;
@@ -120,8 +120,10 @@ function getLatLngForSelectedSuggestion(address, action){
       let _locationCords = {};
       _locationCords.lat = xhr.response.results[0].geometry.location.lat;
       _locationCords.lng = xhr.response.results[0].geometry.location.lng;
-      if(action === "change loc"){
+      if(ACTION === "change loc"){
+        // console.log(ACTION, _locationCords);
         locationCords = _locationCords;
+        ACTION = "";
       }
       getWeather(_locationCords);
     }
@@ -142,7 +144,8 @@ chrome.omnibox.onInputChanged.addListener(
     // suggest is a function that takes an array of objects containing content and description
     if(text.includes("change location ")){
       console.log(text.replace("change location ", ""));
-      omniboxSuggestions(text.replace("change location ", ""), suggest, "change loc");
+      ACTION = "change loc";
+      omniboxSuggestions(text.replace("change location ", ""), suggest);
     }
     else if(text.includes("change units ")){
       suggest([
@@ -155,13 +158,13 @@ chrome.omnibox.onInputChanged.addListener(
       omniboxSuggestions(text, suggest);
     }
 
-    console.log('inputChanged: ' + text);
+    // console.log('inputChanged: ' + text);
   });
 
 // This event is fired with the user accepts the input in the omnibox.
 chrome.omnibox.onInputEntered.addListener(
   function(text) {
-    console.log('inputEntered: ' + text);
+    // console.log('inputEntered: ' + text);
     // Change units and refresh weather.
     if(["F", "f"].indexOf(text.replace("change units ")[0]) > -1){
       weatherUnits = "Imperial";
@@ -179,7 +182,7 @@ chrome.omnibox.onInputEntered.addListener(
       return;
     }
     else{
-      return;
+      null;
     }
     getLatLngForSelectedSuggestion(text);
   });
