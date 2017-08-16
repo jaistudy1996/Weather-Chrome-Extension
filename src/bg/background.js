@@ -157,8 +157,15 @@ chrome.omnibox.onInputChanged.addListener(
   function(text, suggest) {
     // suggest is a function that takes an array of objects containing content and description
     if(text.includes("change location ")){
-        console.log(text.replace("change location ", ""));
-        omniboxSuggestions(text.replace("change location ", ""), suggest, "change loc");
+      console.log(text.replace("change location ", ""));
+      omniboxSuggestions(text.replace("change location ", ""), suggest, "change loc");
+    }
+    else if(text.includes("change units ")){
+      suggest([
+        {content: "F", description: "Fahrenheit"},
+        {content: "C", description: "Celsius"},
+        {content: "K", description: "Kelvin"}
+      ]);
     }
     else{
       omniboxSuggestions(text, suggest);
@@ -171,5 +178,23 @@ chrome.omnibox.onInputChanged.addListener(
 chrome.omnibox.onInputEntered.addListener(
   function(text) {
     console.log('inputEntered: ' + text);
+    if(["F", "f"].indexOf(text.replace("change units ")[0]) > -1){
+      weatherUnits = "Imperial";
+      getWeather(locationCords);
+      return;
+    }
+    else if(["C", "c"].indexOf(text.replace("change units ")[0]) > -1){
+      weatherUnits = "Metric";
+      getWeather(locationCords);
+      return;
+    }
+    else if(["K", "k"].indexOf(text.replace("change units ")[0]) > -1){
+      weatherUnits = "Default";
+      getWeather(locationCords);
+      return;
+    }
+    else{
+      return;
+    }
     getLatLngForSelectedSuggestion(text);
   });
