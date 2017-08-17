@@ -161,12 +161,12 @@ chrome.browserAction.onClicked.addListener(function(){
 chrome.omnibox.onInputChanged.addListener(
   function(text, suggest) {
     // suggest is a function that takes an array of objects containing content and description
-    if(text.includes("change location ")){
+    if(text.includes("change location ") || text.includes("change location")){
       console.log(text.replace("change location ", ""));
       ACTION = "change loc";
-      omniboxSuggestions(text.replace("change location ", ""), suggest);
+      omniboxSuggestions(text.replace("change location", ""), suggest);
     }
-    else if(text.includes("change units ")){
+    else if(text.includes("change units ") || text.includes("change units")){
       suggest([
         {content: "F", description: "Fahrenheit"},
         {content: "C", description: "Celsius"},
@@ -185,17 +185,18 @@ chrome.omnibox.onInputEntered.addListener(
   function(text) {
     // console.log('inputEntered: ' + text);
     // Change units and refresh weather.
-    if(["F", "f"].indexOf(text.replace("change units ")[0]) > -1){
+    text.includes("change units ") ? (text = text.replace("change units ")) : (text = text.replace("change units")); 
+    if(["F", "f"].indexOf(text[0]) > -1){
       weatherUnits = "Imperial";
       getWeather(locationCords);
       return;
     }
-    else if(["C", "c"].indexOf(text.replace("change units ")[0]) > -1){
+    else if(["C", "c"].indexOf(text[0]) > -1){
       weatherUnits = "Metric";
       getWeather(locationCords);
       return;
     }
-    else if(["K", "k"].indexOf(text.replace("change units ")[0]) > -1){
+    else if(["K", "k"].indexOf(text[0]) > -1){
       weatherUnits = "Default";
       getWeather(locationCords);
       return;
