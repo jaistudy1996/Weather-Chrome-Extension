@@ -36,6 +36,8 @@ function loc_success(position) {
  */
 function loc_error() {
 	locationCords.status = ERROR;
+  getWeather(locationCords); // call this funtion even if we have errors
+  getAlerts(locationCords);
 }
 
 // run for the first time.
