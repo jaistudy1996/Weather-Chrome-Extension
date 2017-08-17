@@ -6,6 +6,43 @@ var googleMapsApiKey = "AIzaSyDizy6zNKrzN5nSZF7uoDmV_UQZM4aEfUI";
 var googelMapsLatLngKey = "AIzaSyD2gNxs_Kcp_QMcoEfndYw0L4ykMG3P-24";
 var weatherUnits = "Metric";  //Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
 var ACTION = ""; //action string "change loc"
+var RAIN = [{ apparentTemperature:63.33,
+  cloudCover:0.95,
+  dewPoint:54.11,
+  humidity:0.72,
+  icon:"rain",
+  ozone:293.65,
+  precipIntensity:0.0123,
+  precipProbability:0.27,
+  precipType:"rain",
+  pressure:1012.55,
+  summary:"Light Rain",
+  temperature:63.33,
+  time: 1502989730,
+  uvIndex:0,
+  visibility:10,
+  windBearing:153,
+  windGust:10.08,
+  windSpeed: 5.29},
+
+  { apparentTemperature:63.33,
+    cloudCover:0.95,
+    dewPoint:54.11,
+    humidity:0.72,
+    icon:"rain",
+    ozone:293.65,
+    precipIntensity:0.0123,
+    precipProbability:0.27,
+    precipType:"rain",
+    pressure:1012.55,
+    summary:"Light Rain",
+    temperature:63.33,
+    time: 1502989745,
+    uvIndex:0,
+    visibility:10,
+    windBearing:153,
+    windGust:10.08,
+    windSpeed: 5.29}]; // store timings for rain
 // Get user's current location
 function getLocation(){
 	if("geolocation" in navigator && locationCords.lat == undefined && locationCords.lng == undefined){
@@ -28,6 +65,7 @@ function loc_success(position) {
 	locationCords.lng = lng;
 
   getWeather(locationCords); // call this funtion everytime we have new location cordinats.
+  getAlerts(locationCords);
 }
 
 /**
@@ -185,7 +223,7 @@ chrome.omnibox.onInputEntered.addListener(
   function(text) {
     // console.log('inputEntered: ' + text);
     // Change units and refresh weather.
-    text.includes("change units ") ? (text = text.replace("change units ")) : (text = text.replace("change units")); 
+    text.includes("change units ") ? (text = text.replace("change units ")) : (text = text.replace("change units"));
     if(["F", "f"].indexOf(text[0]) > -1){
       weatherUnits = "Imperial";
       getWeather(locationCords);
@@ -206,3 +244,58 @@ chrome.omnibox.onInputEntered.addListener(
     }
     getLatLngForSelectedSuggestion(text);
   });
+
+/**
+ * @function getAlerts get warning alerts from darksky api
+ * @param {object} _locationCords location object with lat and lng
+ */
+function getAlerts(_locationCords){
+  console.log("inside alert");
+  console.log(RAIN);
+  for(let i = 0; i<RAIN.length; i++){
+    let intvl = setInterval(function(){
+      console.log(RAIN[i].time);
+      chrome.notifications.create( `weather_update_${i}`,{
+        type: 'basic',
+        iconUrl: '../../icons/sun64.png',
+        title: "Weather Update",
+        message: `${RAIN[0].summary}`,
+        requireInteraction: true
+        },
+        function(){
+          null;
+        }
+      );
+      clearInterval(intvl);
+    }, (RAIN[i].time - Math.round(Date.now() / 1000))*1000);
+  }
+  if(1<0){
+    let xhr = new XMLHttpRequest();
+    xhr.responseType = 'json';
+    let url = `https://api.darksky.net/forecast/08ac2bd43d658159d9a934bb46167302/${_locationCords.lat},${_locationCords.lng}/`;
+    xhr.onreadystatechange = function(){
+      if(this.readyState == 4 && this.status == 200){
+        for(let i = 0; i<xhr.response.hourly.data.length; i++){
+          if( xhr.response.hourly.data[i].precipProbability > 0.05){
+            RAIN.push(xhr.response.hourly.data[i]);
+            let intvl = setInterval(function(){
+              chrome.notifications.create(`weather_update_${i}`,
+                {
+                  type: 'basic',
+                  iconUrl: '../../icons/sun64.png',
+                  title: "Weather Update",
+                  message: `${xhr.response.hourly.data[i].summary} in 30 minutes`,
+                  requireInteraction: true
+                }, function(){
+                  null;
+                });
+              }, (xhr.response.hourly.data[i].time - 1800 - Math.round(Date.now() / 1000))*1000);
+              // subtract 30 mins to show notification 30 mins before it rains.
+          }
+        }
+      }
+    }
+    xhr.open("GET", url, true);
+    xhr.send();
+  }
+}
