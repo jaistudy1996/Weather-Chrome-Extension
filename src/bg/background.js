@@ -221,7 +221,6 @@ function getAlerts(_locationCords){
       if(this.readyState == 4 && this.status == 200){
         for(let i = 0; i<xhr.response.hourly.data.length; i++){
           if( xhr.response.hourly.data[i].precipProbability > 0.05){
-            RAIN.push(xhr.response.hourly.data[i]);
             let intvl = setInterval(function(){
               chrome.notifications.create(`weather_update_${i}`,
                 {
