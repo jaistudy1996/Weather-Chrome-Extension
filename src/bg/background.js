@@ -5,6 +5,7 @@
 //TODOD clear intervals on update.
 //TODO make creation of notification a seperate funtion
 //TODO Fix weather does not update after computer wakes up from sleep. Webworker maybe?
+//TODO Fix bug where updated alert clears the end of alert that was retrieved in update before that update
 
 
 // Global variables
@@ -57,7 +58,11 @@ function loc_error() {
 getLocation();
 
 // set interval to check for location every 15 minutes.
-var intvlGetLoc = setInterval(getLocation, 600000);
+var intvlGetLoc = setInterval(function(){
+	let localDate = new Date();
+	console.log("Last updated at: ", localDate.getTime());
+	getLocation();
+}, 600000);
 
 /**
  * This function will get latest weather update
