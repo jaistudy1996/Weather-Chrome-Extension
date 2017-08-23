@@ -1,5 +1,10 @@
 /* jshint esversion:6 */
 
+//TODO Change icons
+//TODO Add alerts from darksky
+//TODO clear intervals on update.
+
+
 // Global variables
 var ERROR = "error";
 var locationCords = {};
@@ -8,6 +13,7 @@ var googleMapsApiKey = "AIzaSyDizy6zNKrzN5nSZF7uoDmV_UQZM4aEfUI";
 var googelMapsLatLngKey = "AIzaSyD2gNxs_Kcp_QMcoEfndYw0L4ykMG3P-24";
 var weatherUnits = "Metric"; //Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
 var ACTION = ""; //action string "change loc"
+var INTERVALS = []; // initialize array to store all intervals.
 // Get user's current location
 function getLocation() {
   if ("geolocation" in navigator && locationCords.lat == undefined && locationCords.lng == undefined) {
@@ -90,7 +96,9 @@ function getWeather(_locationCords) {
           lat: undefined,
           lng: undefined
         });
-        getAlerts(_locationCords);
+        //getAlerts(_locationCords);
+        //no need to call getAlerts when there are no lat and lng available
+        //getWeather should remain independent from any other funtions
       }
     };
     xhr.open("GET", url, true);
@@ -174,6 +182,7 @@ function getLatLngForSelectedSuggestion(address) {
  */
 chrome.browserAction.onClicked.addListener(function() {
   getWeather(locationCords);
+	getAlerts(locationCords);
 });
 
 chrome.omnibox.onInputChanged.addListener(
@@ -253,11 +262,12 @@ function getAlerts(_locationCords) {
 					  }, function() {  });
 					  clearInterval(intvl);
 					}, (xhr.response.hourly.data[i].time - 1800 - Math.round(Date.now() / 1000)) * 1000);
+					INTERVALS.push(intvl);
           // subtract 30 mins to show notification 30 mins before it rains.
           continue;
 					// if it is raining for few hours take dont add notification
         }
-				if (xhr.response.hourly.data[i].precipProbability <= 0.05 && (lastNotifCounter !== "") && (i > lastNotifCounter)) {
+				else if (xhr.response.hourly.data[i].precipProbability <= 0.05 && (lastNotifCounter !== "") && (i > lastNotifCounter)) {
 					// console.log("2 interval set :", i);
           // console.log("2", xhr.response.hourly.data[i]);
 					let intvl = setInterval(function(){
@@ -270,10 +280,12 @@ function getAlerts(_locationCords) {
 					  }, function() {  });
 					  clearInterval(intvl);
 					}, (xhr.response.hourly.data[i].time - 1800 - Math.round(Date.now() / 1000)) * 1000);
+					INTERVALS.push(intvl);
           // subtract 30 mins to show notification 30 mins before it rains.
           lastNotifCounter = "";
         }
       }
+			console.log(INTERVALS);
     }
   };
   xhr.open("GET", url, true);
