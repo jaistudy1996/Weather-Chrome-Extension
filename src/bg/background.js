@@ -1,8 +1,10 @@
 /* jshint esversion:6 */
 
 //TODO Change icons
-//TODO Add alerts from darksky
-//TODO clear intervals on update.
+//TODO Add important alerts from darksky
+//TODOD clear intervals on update.
+//TODO make creation of notification a seperate funtion
+//TODO Fix weather does not update after computer wakes up from sleep. Webworker maybe?
 
 
 // Global variables
@@ -14,7 +16,11 @@ var googelMapsLatLngKey = "AIzaSyD2gNxs_Kcp_QMcoEfndYw0L4ykMG3P-24";
 var weatherUnits = "Metric"; //Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
 var ACTION = ""; //action string "change loc"
 var INTERVALS = []; // initialize array to store all intervals.
-// Get user's current location
+
+/**
+ * @function getLocation Get user's current location
+ * @return {[type]} [description]
+ */
 function getLocation() {
   if ("geolocation" in navigator && locationCords.lat == undefined && locationCords.lng == undefined) {
     locationCords.status = "available";
@@ -247,6 +253,9 @@ function getAlerts(_locationCords) {
     if (this.readyState == 4 && this.status == 200) {
       // console.log(xhr.response);
       let lastNotifCounter = "";
+			intervalClearer(); // this will clear all existing intervals on update of data.
+												 // if there are new updates they will be added otherwise old ones
+												 // will be removed
       for (let i = 0; i < xhr.response.hourly.data.length; i++) {
         if (xhr.response.hourly.data[i].precipProbability > 0.05 && (lastNotifCounter === "")) {
           // console.log("interval set :", i);
@@ -290,4 +299,14 @@ function getAlerts(_locationCords) {
   };
   xhr.open("GET", url, true);
   xhr.send();
+}
+
+/**
+ * @function intervalClearer Clear INTERVALS object and intervals in it as well.
+ */
+function intervalClearer(){
+	for(let i = 0; i<INTERVALS.length; i++){
+		clearInterval(INTERVALS[i]);
+	}
+	INTERVALS = [];
 }
