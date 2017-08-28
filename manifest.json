@@ -1,6 +1,6 @@
 {
   "name": "Weather Application",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "manifest_version": 2,
   "description": "Latest Weather Updates",
   "homepage_url": "http://www.jayantarora.com",
@@ -16,7 +16,8 @@
   "default_locale": "en",
   "background": {
     "scripts": [
-      "src/bg/background.js"
+      "src/bg/background.js",
+      "src/bg/skycons.js"
     ],
     "persistent": true
   },
