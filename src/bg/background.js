@@ -6,6 +6,7 @@
 //TODO make creation of notification a seperate funtion
 //TODO Fix weather does not update after computer wakes up from sleep. Webworker maybe?
 //TODO Fix bug where updated alert clears the end of alert that was retrieved in update before that update
+//TODOD fix bug in getLocation where the refresh is not working. remove test to undefined
 
 
 // Global variables
@@ -23,11 +24,13 @@ var INTERVALS = []; // initialize array to store all intervals.
  * @return {[type]} [description]
  */
 function getLocation() {
-  if ("geolocation" in navigator && locationCords.lat == undefined && locationCords.lng == undefined) {
+  if ("geolocation" in navigator) {
     locationCords.status = "available";
     navigator.geolocation.getCurrentPosition(loc_success, loc_error);
-  } else {
+  }
+	else {
     locationCords.status = ERROR;
+		getWeather(locationCords);
   }
 }
 
@@ -83,8 +86,15 @@ function getWeather(_locationCords) {
         chrome.browserAction.setTitle({
           title: `${xhr.response.name}: ${xhr.response.main.temp_min}° - ${xhr.response.main.temp_max}°:  ${xhr.response.weather[0].description}`
         });
+				// original URL: http://openweathermap.org/img/w/${xhr.response.weather[0].icon}.png
+				// after using RSZ.io http://openweathermap.org.rsz.io/img/w/${xhr.response.weather[0].icon}.png
         chrome.browserAction.setIcon({
-          path: `http://openweathermap.org/img/w/${xhr.response.weather[0].icon}.png`
+          path: {'16':`http://openweathermap.org.rsz.io/img/w/${xhr.response.weather[0].icon}.png?width=16&height=16&format=png`,
+								 '19':`http://openweathermap.org.rsz.io/img/w/${xhr.response.weather[0].icon}.png?width=19&height=19&format=png`,
+								 '38':`http://openweathermap.org.rsz.io/img/w/${xhr.response.weather[0].icon}.png?width=38&height=38&format=png`,
+								 '48':`http://openweathermap.org.rsz.io/img/w/${xhr.response.weather[0].icon}.png?width=48&height=48&format=png`,
+								 '128':`http://openweathermap.org.rsz.io/img/w/${xhr.response.weather[0].icon}.png?width=128&height=128&format=png`
+								}
         });
         chrome.browserAction.setBadgeBackgroundColor({
           color: [0, 0, 0, 1]
