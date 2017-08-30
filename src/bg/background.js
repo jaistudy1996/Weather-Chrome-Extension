@@ -89,11 +89,11 @@ function getWeather(_locationCords) {
 				// original URL: http://openweathermap.org/img/w/${xhr.response.weather[0].icon}.png
 				// after using RSZ.io http://openweathermap.org.rsz.io/img/w/${xhr.response.weather[0].icon}.png
         chrome.browserAction.setIcon({
-          path: {'16':`http://openweathermap.org.rsz.io/img/w/${xhr.response.weather[0].icon}.png?width=16&height=16&format=png`,
-								 '19':`http://openweathermap.org.rsz.io/img/w/${xhr.response.weather[0].icon}.png?width=19&height=19&format=png`,
-								 '38':`http://openweathermap.org.rsz.io/img/w/${xhr.response.weather[0].icon}.png?width=38&height=38&format=png`,
-								 '48':`http://openweathermap.org.rsz.io/img/w/${xhr.response.weather[0].icon}.png?width=48&height=48&format=png`,
-								 '128':`http://openweathermap.org.rsz.io/img/w/${xhr.response.weather[0].icon}.png?width=128&height=128&format=png`
+          imageData: {'16': drawIcon(16, `${Math.round(xhr.response.main.temp)}`),
+											'19': drawIcon(19, `${Math.round(xhr.response.main.temp)}`),
+											'38': drawIcon(38, `${Math.round(xhr.response.main.temp)}`),
+											'48': drawIcon(48, `${Math.round(xhr.response.main.temp)}`),
+											'128': drawIcon(128, `${Math.round(xhr.response.main.temp)}`)
 								}
         });
         chrome.browserAction.setBadgeBackgroundColor({
@@ -324,4 +324,28 @@ function intervalClearer(){
 		clearInterval(INTERVALS[i]);
 	}
 	INTERVALS = [];
+}
+
+/**
+ * @function drawIcon This function will draw the icon in numbers
+ * @param {number} pixels Number of pixels for height and width of icon
+ * @param  {string} temp Temperature to be displayed
+ * @return {binary}      Binary imageData is returned.
+ */
+function drawIcon(pixels, temp){
+	let canvas = document.createElement("canvas");
+	canvas.height = pixels;
+	canvas.width = pixels;
+
+	let context = canvas.getContext("2d");
+	context.fillStyle = "#FFFFFF";
+  context.fillRect(0, 0, pixels, pixels);
+
+  context.fillStyle = "#000000";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.font = `${pixels-(0.1*pixels)}px Arial`;
+  context.fillText(temp, pixels/2, pixels/2);
+
+  return context.getImageData(0, 0, pixels, pixels);
 }
