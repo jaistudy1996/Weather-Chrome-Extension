@@ -80,9 +80,9 @@ function getWeather(_locationCords) {
     xhr.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
         console.log(xhr.response);
-        chrome.browserAction.setBadgeText({
-          text: `${xhr.response.main.temp}${weatherUnits == "Metric" ? "C" : "F"}`
-        });
+        // chrome.browserAction.setBadgeText({
+        //   text: `${xhr.response.main.temp}${weatherUnits == "Metric" ? "C" : "F"}`
+        // });
         chrome.browserAction.setTitle({
           title: `${xhr.response.name}: ${xhr.response.main.temp_min}° - ${xhr.response.main.temp_max}°:  ${xhr.response.weather[0].description}`
         });
@@ -338,7 +338,7 @@ function drawIcon(pixels, temp){
 	canvas.width = pixels;
 
 	let context = canvas.getContext("2d");
-	context.fillStyle = "#FFFFFF";
+	context.fillStyle = "rgba(255, 255, 255, 0.5)";//"#FFFFFF";
   context.fillRect(0, 0, pixels, pixels);
 
   context.fillStyle = "#000000";
