@@ -45,7 +45,7 @@ function loc_success(position) {
   locationCords.lng = lng;
 
   getWeather(locationCords); // call this funtion everytime we have new location cordinats.
-  getAlerts(locationCords);
+  //getAlerts(locationCords);
 }
 
 /**
@@ -54,7 +54,7 @@ function loc_success(position) {
 function loc_error() {
   locationCords.status = ERROR;
   getWeather(locationCords); // call this funtion even if we have errors
-  getAlerts(locationCords);
+  //getAlerts(locationCords);
 }
 
 // run for the first time.
@@ -188,7 +188,7 @@ function getLatLngForSelectedSuggestion(address) {
       if (ACTION === "change loc") {
         // console.log(ACTION, _locationCords);
         locationCords = _locationCords;
-        getAlerts(_locationCords);
+        //getAlerts(_locationCords);
         ACTION = "";
       }
       getWeather(_locationCords);
@@ -203,7 +203,7 @@ function getLatLngForSelectedSuggestion(address) {
  */
 chrome.browserAction.onClicked.addListener(function() {
   getWeather(locationCords);
-	getAlerts(locationCords);
+	//getAlerts(locationCords);
 });
 
 chrome.omnibox.onInputChanged.addListener(
